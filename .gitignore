@@ -1,0 +1,8 @@
+# folder that will contain the surrogate point clouds
+clouds/
+
+# folder that will contain the temporary stl file as well as the finally created discrete sediment bodies
+meshes/
+
+# automatically generated folder
+__pycache__/
