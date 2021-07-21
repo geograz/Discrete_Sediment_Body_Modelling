@@ -6,3 +6,8 @@ meshes/
 
 # automatically generated folder
 __pycache__/
+
+# Python file that analyzes the scattering of results for section 5 "Randomness and parameter tuning" of the paper
+spread.py
+spread_hist.png
+spread_scatter.png
