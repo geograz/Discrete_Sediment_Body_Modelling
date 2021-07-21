@@ -27,18 +27,22 @@ class modifier:
     def __init__(self):
         pass
 
-    def correct_direction(self, direction: int) -> int:
+    def correct_direction(self, direction: int, dip: int) -> int:
         ''' as the orientation of each sediment body is subject to some
         randomnes, invalid orientations might occur that should be corrected'''
         if direction > 180:
             direction = direction - 180
         elif direction < 0:
             direction = direction + 180
-        else:
-            direction = direction
-        return direction
+        
+        if dip > 90:
+            dip = 90 - (dip - 90)
+        elif dip < 0:
+            dip = 0 + dip * -1
+        
+        return direction, dip
 
-    def rotate_pc(self, DIRECTION: int, DIR_STD: int,
+    def rotate_pc(self, DIRECTION: int, DIR_STD: int, DIP: int, DIP_STD: int,
                   point_cloud: np.array) -> np.array:
         ''' function rotates a surrogate point cloud according to the
         preferrred orientation and standard deviation '''
@@ -49,29 +53,43 @@ class modifier:
             DIRECTION = np.random.normal(loc=DIRECTION,
                                          scale=DIR_STD, size=1)[0]
 
+        if DIP == 'random':
+            DIP = np.random.uniform(0, 90)
+        else:
+            DIP = np.random.normal(loc=DIP, scale=DIP_STD, size=1)[0]
+
         # correct direction if > 180° or < 0°
-        DIRECTION = self.correct_direction(DIRECTION)
+        DIRECTION, DIP = self.correct_direction(DIRECTION, DIP)
 
+        # first rotate point cloud accoridng to dip around X-axis
+        dip_radians = np.radians(-DIP)
+        dip_rotation_axis = np.array([0, 1, 0])
+        dip_rotation_vector = dip_radians * dip_rotation_axis
+        rotation = Rotation.from_rotvec(dip_rotation_vector)
+        point_cloud = rotation.apply(point_cloud)
+
+        # secondly rotate around vertical center axis of point cloud
         DIRECTION = -(90 + DIRECTION)
-        rotation_radians = np.radians(DIRECTION)
-        # rotate around vertical center axis of point cloud
-        rotation_axis = np.array([0, 0, 1])
-        rotation_vector = rotation_radians * rotation_axis
+        dir_radians = np.radians(DIRECTION)
+        dir_rotation_axis = np.array([0, 0, 1])
+        dir_rotation_vector = dir_radians * dir_rotation_axis
+        rotation = Rotation.from_rotvec(dir_rotation_vector)
+        point_cloud = rotation.apply(point_cloud)
 
-        rotation = Rotation.from_rotvec(rotation_vector)
-
-        return rotation.apply(point_cloud)
+        return point_cloud
 
 
 class generator(modifier):
     ''' class of functions that generates the surrogate point clouds '''
 
     def __init__(self, SCALE: Iterable, POINT_COUNT: int, DIRECTION: int,
-                 DIR_STD: int):
+                 DIR_STD: int, DIP: int, DIP_STD: int):
         self.SCALE = SCALE
         self.POINT_COUNT = POINT_COUNT
         self.DIRECTION = DIRECTION
         self.DIR_STD = DIR_STD
+        self.DIP = DIP
+        self.DIP_STD = DIP_STD
 
     def generate_centers(self, lower_left_corner: Iterable,
                          upper_right_corner: Iterable,
@@ -109,7 +127,8 @@ class generator(modifier):
             # create pc at position 0,0,0
             cloud = self.generate_pc([0, 0, 0])
             # rotate point cloud into preferred direction of elongation
-            cloud = self.rotate_pc(self.DIRECTION, self.DIR_STD, cloud)
+            cloud = self.rotate_pc(self.DIRECTION, self.DIR_STD,
+                                   self.DIP, self.DIP_STD, cloud)
             cloud += center  # shift pc to new position
             clouds.append(cloud)  # store clouds in list
             idxs.append(np.full(len(cloud), i))  # store indexes in list
@@ -173,7 +192,7 @@ class meshtools:
                                                     depth=depth)
         bbox.compute_vertex_normals()
         bbox.translate(translation)
-        o3d.io.write_triangle_mesh('bbox.stl', bbox)
+        o3d.io.write_triangle_mesh(r'meshes\bbox.stl', bbox)
 
     def save_mesh(self, o3d_mesh: o3d.geometry.TriangleMesh,
                   LLC_ABS: Iterable) -> (tri.Trimesh, float):
@@ -201,15 +220,17 @@ if __name__ == "__main__":
     # fixed variables and (hyper)parameters
 
     # sediment body hyperparameters
-    A_B_C = [12, 6, 4]  # x, y, z scale with respect to the center [m]
-    A = 240  # primary direction of bodies between 0 & 180°, also: 'random'
-    B = 5  # standard deviation of direction orientation
+    A_B_C = [10, 5, 3]  # x, y, z scale with respect to the center [m]
+    ALPHA = 120  # primary direction of bodies between 0 & 180°, also: 'random'
+    BETA = 10  # standard deviation of direction orientation
+    GAMMA = 0  # average dip of the sediment bodies
+    DELTA = 0  # standard deviation of the average dip of the sediment bodies
     MIN_VOL = 50  # [m³]
-    TARGET_FRACTION = 0.05  # target % of volume that consists of sediments
+    TARGET_FRACTION = 0.10  # target % of volume that consists of sediments
     MAX_FRACTION = 0.35  # maximum % of volume that consists of sediment bodies
 
     # volume hyperparameters
-    N_b = 800  # initial number of surrogate point clouds
+    N_b = 700  # initial number of surrogate point clouds
     PLUS = 100  # number of bodies that are added in each iteration
     LLC_ABS = (0, 0, 0)  # Left Lower Corner of volume [metric coordinates]
     LLC = [0, 0, 0]  # relative left lower corner of bounding box
@@ -218,11 +239,11 @@ if __name__ == "__main__":
     # cluster hyperparameters
     N_p = 500  # number of points of each surrogate point cloud
     MIN_CL_COUNT = 10  # minimum number of generated clusters
-    EPS = 4.4  # DBSCAN main parameter / maximum distance between two samples for one to be considered as in the neighborhood of the other
-    MIN_SAMPLES = 50  # minimum number of datapoints in one cluster
+    EPS = 5.7  # DBSCAN main parameter / maximum distance between two samples for one to be considered as in the neighborhood of the other
+    MIN_SAMPLES = 100  # minimum number of datapoints in one cluster
 
     # mesh parameters
-    ALPHA = 5  # ALPHA determines "tightness" of  meshes around the clusters
+    ALPHA_c = 5  # ALPHA_c determines "tightness" of  meshes around the clusters
     N_it = 15  # number of iterations for surface smoothing after Taubin (1995)
     N_ia = 5  # number of iterations for simple average surface smoothing
 
@@ -235,21 +256,22 @@ if __name__ == "__main__":
     ##########################################################################
     # instanciation
 
-    gen = generator(A_B_C, N_p, A, B)
+    gen = generator(A_B_C, N_p, ALPHA, BETA, GAMMA, DELTA)
     mod = modifier()
-    mtls = meshtools(ALPHA, MIN_VOL, max_vol)
+    mtls = meshtools(ALPHA_c, MIN_VOL, max_vol)
 
     ##########################################################################
     # main sediment body generation
-
-    # save boundinx box if desired
-    # mtls.bbox(width=L, height=W, depth=H, translation=LLC_ABS)
 
     # remove old meshes
     for file in os.listdir('meshes'):
         os.remove(fr'meshes\{file}')
 
-    np.random.seed(4)
+    # save boundinx box if desired
+    mtls.bbox(width=L, height=W, depth=H, translation=LLC_ABS)
+
+    # fix the seed for reproducibility
+    np.random.seed(1)
 
     # initial fraction of volume of bodies to total volume
     perc_volumes = 0
