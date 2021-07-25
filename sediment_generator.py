@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Source code to the publication "3D Discrete Sediment Body Modelling" by
-G.H. Erharter, F. Tschuchnigg, G. Poscher in the journal XXXXXX
+Source code to the publication
+"Stochastic 3D modelling of discrete sediment bodies for geotechnical applications"
+by G.H. Erharter, F. Tschuchnigg, G. Poscher in the journal
+Applied Computing and Geosciences
+DOI: https://doi.org/10.1016/j.acags.2021.100066
 
 Coding: G.H. Erharter
 """

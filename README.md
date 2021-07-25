@@ -7,7 +7,7 @@ by Georg H. Erharter, Franz Tschuchnigg and Gerhard Poscher
 
 published in the __Applied Computing and Geosciences (Vol. XXX; XXX 2021)__
 
-DOI: xxx
+DOI: https://doi.org/10.1016/j.acags.2021.100066
 
 Use the `sediment_generator.py` Python code to generate your own sediment bodies as it is described in the paper.
 
