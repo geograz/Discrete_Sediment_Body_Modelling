@@ -5,7 +5,7 @@ _Stochastic 3D Modelling of Discrete Sediment Bodies for Geotechnical Applicatio
 
 by Georg H. Erharter, Franz Tschuchnigg and Gerhard Poscher
 
-published in the __Applied Computing and Geosciences (Vol. XXX; XXX 2021)__
+published in the __Applied Computing and Geosciences (Vol. 11; September 2021)__
 
 DOI: https://doi.org/10.1016/j.acags.2021.100066
 
