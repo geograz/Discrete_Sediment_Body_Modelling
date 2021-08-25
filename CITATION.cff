@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+author:
+- family-names: "Erharter"
+  given-names: "Georg H."
+  orcid: "https://orcid.org/0000-0002-7793-9994"
+title: "Code to the paper Stochastic 3D modelling of discrete sediment bodies for geotechnical applications"
+version: 1.0.0
+date-released: 2021-07-25
+url: "https://github.com/geograz/Discrete_Sediment_Body_Modelling"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Erharter"
+    given-names: "Georg H."
+    orcid: "https://orcid.org/0000-0002-7793-9994"
+  - family-names: "Tschuchnigg"
+    given-names: "Franz"
+  - family-names: "Poscher"
+    given-names: "Gerhard"
+  doi: "https://doi.org/10.1016/j.acags.2021.100066"
+  url: "https://www.sciencedirect.com/science/article/pii/S2590197421000148"
+  journal: "Applied Computing and Geosciences"
+  issn: "2590-1974"
+  title: "Stochastic 3D modelling of discrete sediment bodies for geotechnical applications"
+  volume: 11
+  year: 2021
+  keywords: "Geological 3D modelling, Discrete sediment bodies, Stochastic modelling, FE Analysis, Slope stability"
