@@ -250,6 +250,8 @@ if __name__ == "__main__":
     N_it = 15  # number of iterations for surface smoothing after Taubin (1995)
     N_ia = 5  # number of iterations for simple average surface smoothing
 
+    SEED = 1  # all models for paper were made with SEED = 1
+
     ##########################################################################
     # computed variables
     ruc = [LLC[0]+L, LLC[1]+W, LLC[2]+H]  # right upper corner
@@ -266,6 +268,12 @@ if __name__ == "__main__":
     ##########################################################################
     # main sediment body generation
 
+    # make folders if necessary
+    if not os.path.exists('meshes'):
+        os.makedirs('meshes')
+    if not os.path.exists('clouds'):
+        os.makedirs('clouds')
+
     # remove old meshes
     for file in os.listdir('meshes'):
         os.remove(fr'meshes\{file}')
@@ -274,7 +282,7 @@ if __name__ == "__main__":
     mtls.bbox(width=L, height=W, depth=H, translation=LLC_ABS)
 
     # fix the seed for reproducibility
-    np.random.seed(1)
+    np.random.seed(SEED)
 
     # initial fraction of volume of bodies to total volume
     perc_volumes = 0

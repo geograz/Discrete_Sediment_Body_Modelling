@@ -1,0 +1,17 @@
+name: sediment_bodies
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python=3.12
+- matplotlib
+- numpy
+- pandas
+- pip
+- scikit-learn=1.5
+- scipy
+- spyder-kernels=3.0
+- tqdm
+- trimesh
+- pip:
+  - open3d
